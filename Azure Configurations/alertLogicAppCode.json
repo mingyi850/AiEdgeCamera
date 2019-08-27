@@ -1,0 +1,115 @@
+{
+    "$connections": {
+        "value": {
+            "commondataservice": {
+                "connectionId": "/subscriptions/50fb2758-5add-47ee-b8f2-9c9ae596fed5/resourceGroups/pekAiEdgeCamera/providers/Microsoft.Web/connections/commondataservice",
+                "connectionName": "commondataservice",
+                "id": "/subscriptions/50fb2758-5add-47ee-b8f2-9c9ae596fed5/providers/Microsoft.Web/locations/southeastasia/managedApis/commondataservice"
+            },
+            "servicebus": {
+                "connectionId": "/subscriptions/50fb2758-5add-47ee-b8f2-9c9ae596fed5/resourceGroups/pekAiEdgeCamera/providers/Microsoft.Web/connections/servicebus",
+                "connectionName": "servicebus",
+                "id": "/subscriptions/50fb2758-5add-47ee-b8f2-9c9ae596fed5/providers/Microsoft.Web/locations/southeastasia/managedApis/servicebus"
+            }
+        }
+    },
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Create_a_new_record": {
+                "inputs": {
+                    "body": {
+                        "crf2d_confidence": "@{body('Parse_JSON')?['confidence']}",
+                        "crf2d_device": "@body('Parse_JSON')?['device']",
+                        "crf2d_imagepath": "@body('Parse_JSON')?['imagePath']",
+                        "crf2d_imageurl": "@body('Parse_JSON')?['imageURL']",
+                        "crf2d_label": "@body('Parse_JSON')?['label']",
+                        "crf2d_location": "@body('Parse_JSON')?['location']",
+                        "crf2d_timestamp": "@{string(body('Parse_JSON')?['timestamp'])}"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('org41b56d5e.crm5'))}/tables/@{encodeURIComponent(encodeURIComponent('crf2d_helmetalerts'))}/items"
+                },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "Parse_JSON": {
+                "inputs": {
+                    "content": "@base64ToString(triggerBody()?['ContentData'])",
+                    "schema": {
+                        "properties": {
+                            "confidence": {
+                                "type": "integer"
+                            },
+                            "device": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "imagePath": {
+                                "type": "string"
+                            },
+                            "imageURL": {
+                                "type": "string"
+                            },
+                            "label": {
+                                "type": "string"
+                            },
+                            "location": {
+                                "type": "string"
+                            },
+                            "noHelmetAlert": {
+                                "type": "boolean"
+                            },
+                            "timestamp": {
+                                "type": "number"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "runAfter": {},
+                "type": "ParseJson"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "When_a_message_is_received_in_a_queue_(auto-complete)": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['servicebus']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/@{encodeURIComponent(encodeURIComponent('pekaiedgecambusqueue'))}/messages/head",
+                    "queries": {
+                        "queueType": "Main"
+                    }
+                },
+                "recurrence": {
+                    "frequency": "Second",
+                    "interval": 3
+                },
+                "type": "ApiConnection"
+            }
+        }
+    }
+}

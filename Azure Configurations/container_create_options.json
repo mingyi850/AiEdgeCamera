@@ -1,0 +1,21 @@
+{
+  "HostConfig": {
+    "LogConfig": {
+      "Type": "json-file",
+      "Config": {
+        "max-size": "10m",
+        "max-file": "3"
+      }
+    },
+    "Binds": [
+      "/data/misc/camera:/app/vam_model_folder"
+    ],
+    "NetworkMode": "host"
+  },
+  "NetworkingConfig": {
+    "EndpointsConfig": {
+      "host": {}
+    }
+  },
+  "WorkingDir": "/var/azureml-app"
+}
