@@ -32,8 +32,8 @@ __BASE.MODULE_NAME = Provide Module Name Here
 # In order to fill this in section, you will need to use Tensorboard to open your prebuilt tensorflow model
 # You will then need to identify the Input_Node and Output_Node required for the specific model.
 
-__BASE.MODEL_INPUT_NODE =
-__BASE.MODEL_INPUT_DIMS =
+__BASE.MODEL_INPUT_NODE = ""
+__BASE.MODEL_INPUT_DIMS = ""
 __BASE.MODEL_OUTPUTS_NODES = []
 
 # Settings used in SnpeConverter API (TensorFlow  Caffe)
